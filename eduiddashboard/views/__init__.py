@@ -11,6 +11,7 @@ from pyramid_deform import FormView
 
 from eduiddashboard.forms import BaseForm
 from eduiddashboard.i18n import TranslationString as _
+from eduiddashboard.i18n import I18NJSONEncoderFactory
 from eduiddashboard.utils import get_short_hash
 from eduiddashboard.verifications import (get_verification_code,
                                           verificate_code,
@@ -46,8 +47,7 @@ class BaseFormView(FormView):
             'url': context.route_url(self.route),
             'target': "div.{classname}-form-container".format(
                 classname=self.classname),
-
-        })
+        }, cls=I18NJSONEncoderFactory(request))
 
         self.form_options = {
             'formid': "{classname}-form".format(classname=self.classname),
@@ -114,7 +114,7 @@ class BaseActionsView(object):
         result = action_method(index, post_data)
         result['action'] = action
         result['identifier'] = index
-        return Response(json.dumps(result))
+        return Response(json.dumps(result, cls=I18NJSONEncoderFactory(self.request)))
 
     def get_verification_data_id(self, data_to_verify):
         raise NotImplementedError()

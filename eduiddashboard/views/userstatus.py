@@ -6,14 +6,15 @@ from eduiddashboard.utils import (calculate_filled_profile,
                                   get_pending_actions)
 
 
-@view_config(route_name='userstatus', permission='edit', renderer='json')
+@view_config(route_name='userstatus', permission='edit', renderer='i18njson')
 def userstatus(context, request):
     user = context.user
     tabs = get_available_tabs(context)
     profile_filled = calculate_filled_profile(context.user, tabs)
+    pending_actions = get_pending_actions(user, tabs)
     return {
         'loa': request.session.get('loa', 1),
         'max_loa': get_max_available_loa(context.get_groups()),
         'profile_filled': '%s%%' % profile_filled,
-        'pending_actions': get_pending_actions(user, tabs),
+        'pending_actions': pending_actions,
     }
