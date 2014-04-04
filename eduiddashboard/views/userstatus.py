@@ -11,10 +11,9 @@ def userstatus(context, request):
     user = context.user
     tabs = get_available_tabs(context)
     profile_filled = calculate_filled_profile(context.user, tabs)
-    pending_actions = get_pending_actions(user, tabs)
     return {
         'loa': request.session.get('loa', 1),
         'max_loa': get_max_available_loa(context.get_groups()),
         'profile_filled': '%s%%' % profile_filled,
-        'pending_actions': pending_actions,
+        'pending_actions': get_pending_actions(user, tabs),
     }

@@ -7,7 +7,6 @@ from pkg_resources import resource_filename
 from deform import Form
 
 from pyramid.config import Configurator
-from pyramid.renderers import JSON
 from pyramid.exceptions import ConfigurationError
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.settings import asbool
