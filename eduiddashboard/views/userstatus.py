@@ -6,7 +6,7 @@ from eduiddashboard.utils import (calculate_filled_profile,
                                   get_pending_actions)
 
 
-@view_config(route_name='userstatus', permission='edit', renderer='i18njson')
+@view_config(route_name='userstatus', permission='edit', renderer='json')
 def userstatus(context, request):
     user = context.user
     tabs = get_available_tabs(context)

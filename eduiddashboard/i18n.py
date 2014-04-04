@@ -8,6 +8,17 @@ translation_domain = 'eduid-dashboard'
 
 
 class JSONAwareTranslationStringProxy(object):
+    '''
+    The reason for this proxy is to avoid automatic
+    encoding of string types
+    (translationstring.TranslationString *is* a string type)
+    by Python's json module.
+    There is no way of overriding the default encoding of
+    json serializable objects in Python's json package.
+
+    We want to do the translation when json encoding the
+    translation string.
+    '''
 
     def __init__(self, s, **kwargs):
         self._ts = TS(s, **kwargs)
@@ -28,10 +39,29 @@ class JSONAwareTranslationStringProxy(object):
         return str(self._ts)
 
     def __json__(self, request):
+        '''
+        This is to be used in the default json renderer
+        of pyramid's rendering machinery, that kicks in when a view is
+        decorated to be rendered as json and returns a ``dict`` (such as
+        the eduiddashboard.views.userstatus:userstatus view).
+        It is set up in the ``main`` function in eduiddashboard/__init__.py
+        (line 446).
+
+        The default JSON renderer in pyramid will call the __json__ method
+        of an object if a TypeError is raised when it tries to encode it,
+        and gives the request as a parameter to this method.
+        '''
         return get_localizer(request).translate(self._ts)
 
 
 def TranslationStringFactory(domain):
+    '''
+    This is simply to have the translation domain
+    in the ``create`` closure. The code is 
+    almost straight out of translationstring/__init__.py.
+    The only difference (the ``if`` in ``create``)
+    is to avoid nesting of proxies.
+    '''
     def create(msgid, mapping=None, default=None):
         if not isinstance(msgid, basestring):
             return msgid
@@ -42,15 +72,17 @@ def TranslationStringFactory(domain):
 TranslationString = TranslationStringFactory(translation_domain)
 
 
-class I18NJSONEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        if isinstance(obj, JSONAwareTranslationStringProxy):
-            raise TypeError()
-        return json.JSONEncoder.default(self, obj)
-
-
 def I18NJSONEncoderFactory(request):
+    '''
+    This is a closure around the request, to produce a json
+    encoder (for Python's json standard module) that has
+    the request and can translate translation strings at
+    json encoding time.
+
+    It is used when the json encoding (dumps) is explicitly done
+    in the view, where we have the request (for example, in
+    eduiddashboard/views/__init__.py line 117)
+    '''
     class I18NAwareJSONEncoder(json.JSONEncoder):
 
         def __init__(self, *args, **kwargs):
@@ -64,10 +96,6 @@ def I18NJSONEncoderFactory(request):
 
 
     return I18NAwareJSONEncoder
-
-
-def i18n_json_adapter(obj, request):
-    return get_localizer(request).translate(obj)
 
 
 def locale_negotiator(request):

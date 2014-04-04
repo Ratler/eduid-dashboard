@@ -16,8 +16,7 @@ from pyramid.i18n import get_locale_name
 from eduid_am.celery import celery
 from eduid_am.db import MongoDB
 from eduid_am.userdb import UserDB
-from eduiddashboard.i18n import locale_negotiator, I18NJSONEncoder
-from eduiddashboard.i18n import JSONAwareTranslationStringProxy, i18n_json_adapter
+from eduiddashboard.i18n import locale_negotiator
 from eduiddashboard.permissions import (RootFactory, PersonFactory,
                                         SecurityFactory, ResetPasswordFactory,
                                         PostalAddressFactory, MobilesFactory,
@@ -442,10 +441,6 @@ def main(global_config, **settings):
     config = Configurator(settings=settings,
                           root_factory=RootFactory,
                           locale_negotiator=locale_negotiator)
-
-    i18n_json_renderer = JSON(cls=I18NJSONEncoder)
-    i18n_json_renderer.add_adapter(JSONAwareTranslationStringProxy, i18n_json_adapter)
-    config.add_renderer('i18njson', i18n_json_renderer)
 
     config.set_request_property(get_locale_name, 'locale', reify=True)
 
